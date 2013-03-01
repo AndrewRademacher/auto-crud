@@ -1,40 +1,37 @@
-var assert = require('assert');
+var assert = require('assert'),
+    rest = require('restler');
 
 describe('AutoCRUD', function () {
     describe('Simple Object', function () {
-        it('should be able to create an entry for a simple object', function () {
+        it('should get by id', function () {
+            rest.json('http://' + domain + '/api/widget', {}, null, 'GET')
+                .on('complete', function (data, res) {
+                    console.log(data);
+                    console.log(res.statusCode);
+                });
+        });
+
+        it('should get by search', function () {
             assert(true);
         });
 
-        it('should be able to respond with error messages to bad input', function () {
+        it('should post', function () {
             assert(true);
         });
 
-        it('should be able to update an entry for simple object', function () {
+        it('should put by id', function () {
             assert(true);
         });
 
-        it('should be able to update a group of entries', function () {
+        it('should put by search', function () {
             assert(true);
         });
 
-        it('should be able to get a single simple object', function () {
+        it('should delete by id', function () {
             assert(true);
         });
 
-        it('should be able to get a list of simple objects', function () {
-            assert(true);
-        });
-
-        it('should be able to page a list of simple objects', function () {
-            assert(true);
-        });
-
-        it('should be able to delete a single simple object', function () {
-            assert(true);
-        });
-
-        it('should be able to delete a group of simple objects', function () {
+        it('should delete by search', function () {
             assert(true);
         });
     });
