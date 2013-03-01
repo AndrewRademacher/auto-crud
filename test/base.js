@@ -11,6 +11,7 @@ var app = express(),
     mongo = {};
 
 domain = 'localhost:3000';
+callPrefix = 'http://' + domain + '/api';
 
 app.configure(function () {
     app.set('port', process.env.PORT || 3000);
@@ -24,42 +25,6 @@ app.configure(function () {
 
 app.configure('development', function () {
     app.use(express.errorHandler());
-});
-
-autocrud({
-    app:app,
-    collection:mongo.widget,
-    name:'widget',
-    path:'/api',
-    schema:{
-        type:'object',
-        properties:{
-            name:{type:'string', required:true},
-            dimensions:{
-                type:'object',
-                properties:{
-                    width:{type:'number', required:true},
-                    height:{type:'number', required:true},
-                    length:{type:'number', required:true},
-                    weight:{type:'number', required:true}
-                },
-                additionalProperties:false
-            },
-            price:{type:'number', required:true},
-            description:{type:'string'},
-            salePrice:{type:'number'},
-            manufacturer:{
-                type:'object',
-                properties:{
-                    name:{type:'string'},
-                    website:{type:'string'},
-                    phone:{type:'string'}
-                },
-                additionalProperties:false
-            }
-        },
-        additionalProperties:false
-    }
 });
 
 before(function (done) {
@@ -78,7 +43,47 @@ before(function (done) {
                 //  Insert valid test data to mongo
                 widget.insert(validPool, function (err, result) {
                     if (err) return console.log(err);
-                    for (var i = 0; i < result.length; i++) committedPool.push(result[i]);
+                    result.forEach(function (resObj) {
+                        resObj._id = resObj._id.toString();
+                        committedPool.push(resObj);
+                    });
+
+                    //  Create autocrud route
+                    autocrud({
+                        app:app,
+                        collection:mongo.widget,
+                        name:'widget',
+                        path:'/api',
+                        schema:{
+                            type:'object',
+                            properties:{
+                                name:{type:'string', required:true},
+                                dimensions:{
+                                    type:'object',
+                                    properties:{
+                                        width:{type:'number', required:true},
+                                        height:{type:'number', required:true},
+                                        length:{type:'number', required:true},
+                                        weight:{type:'number', required:true}
+                                    },
+                                    additionalProperties:false
+                                },
+                                price:{type:'number', required:true},
+                                description:{type:'string'},
+                                salePrice:{type:'number'},
+                                manufacturer:{
+                                    type:'object',
+                                    properties:{
+                                        name:{type:'string'},
+                                        website:{type:'string'},
+                                        phone:{type:'string'}
+                                    },
+                                    additionalProperties:false
+                                }
+                            },
+                            additionalProperties:false
+                        }
+                    });
 
                     //  Open test server
                     server = http.createServer(app);
