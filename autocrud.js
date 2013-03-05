@@ -35,7 +35,27 @@ module.exports = function (options) {
 
     //  Build routes
     app.get(rootObjectPath, function (req, res) {
-        echo(req, res);
+        var cursor = collection.find(),
+            sort = req.param('sort'),
+            limit = req.param('limit'),
+            skip = req.param('skip');
+
+        if (sort) {
+            if (sort.match(/^[a-zA-Z]*$/)) cursor.sort(sort);
+            else cursor.sort(JSON.parse(sort));
+        }
+        if (limit) cursor.limit(Number(limit));
+        if (limit && skip) cursor.skip(Number(skip));
+        cursor.toArray(function (err, documents) {
+            if (err) return respondError(res, err, 500);
+            else {
+                if (limit && skip) cursor.count(function (err, count) {
+                    if (err) return respondError(res, err, 500);
+                    else respondSuccess(res, {data:documents, total:count});
+                });
+                else respondSuccess(res, {data:documents, total:documents.length});
+            }
+        });
     });
 
     app.get(rootObjectPath + '/:id', function (req, res) {

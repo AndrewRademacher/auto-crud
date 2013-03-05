@@ -2,7 +2,8 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     MongoClient = require('mongodb').MongoClient,
-    schema = require('json-schema');
+    schema = require('json-schema'),
+    _ = require('underscore');
 
 var autocrud = require('../autocrud');
 
@@ -15,7 +16,7 @@ callPrefix = 'http://' + domain + '/api';
 
 app.configure(function () {
     app.set('port', process.env.PORT || 3000);
-    app.use(express.logger('dev'));
+//    app.use(express.logger('dev'));
     app.use(express.bodyParser());
     app.use(express.methodOverride());
     app.use(express.cookieParser('your secret here'));
@@ -47,6 +48,7 @@ before(function (done) {
                         resObj._id = resObj._id.toString();
                         committedPool.push(resObj);
                     });
+                    committedPool = _.sortBy(committedPool, '_id');
 
                     //  Create autocrud route
                     autocrud({
