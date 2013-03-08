@@ -52,38 +52,38 @@ before(function (done) {
 
                     //  Create autocrud route
                     autocrud({
-                        app:app,
-                        collection:mongo.widget,
-                        name:'widget',
-                        path:'/api',
-                        schema:{
-                            type:'object',
-                            properties:{
-                                name:{type:'string', required:true},
-                                dimensions:{
-                                    type:'object',
-                                    properties:{
-                                        width:{type:'number', required:true},
-                                        height:{type:'number', required:true},
-                                        length:{type:'number', required:true},
-                                        weight:{type:'number', required:true}
+                        app: app,
+                        collection: mongo.widget,
+                        name: 'widget',
+                        path: '/api',
+                        schema: {
+                            type: 'object',
+                            properties: {
+                                name: {type: 'string', required: true},
+                                dimensions: {
+                                    type: 'object',
+                                    properties: {
+                                        width: {type: 'number', required: true},
+                                        height: {type: 'number', required: true},
+                                        length: {type: 'number', required: true},
+                                        weight: {type: 'number', required: true}
                                     },
-                                    additionalProperties:false
+                                    additionalProperties: false
                                 },
-                                price:{type:'number', required:true},
-                                description:{type:'string'},
-                                salePrice:{type:'number'},
-                                manufacturer:{
-                                    type:'object',
-                                    properties:{
-                                        name:{type:'string'},
-                                        website:{type:'string'},
-                                        phone:{type:'string'}
+                                price: {type: 'number', required: true},
+                                description: {type: 'string'},
+                                salePrice: {type: 'number'},
+                                manufacturer: {
+                                    type: 'object',
+                                    properties: {
+                                        name: {type: 'string'},
+                                        website: {type: 'string'},
+                                        phone: {type: 'string'}
                                     },
-                                    additionalProperties:false
+                                    additionalProperties: false
                                 }
                             },
-                            additionalProperties:false
+                            additionalProperties: false
                         }
                     });
 

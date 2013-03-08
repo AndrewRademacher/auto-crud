@@ -1,13 +1,13 @@
 {
-    "name":"AutoCRUD",
-    "version":"0.0.1",
-    "dependencies":{
-        "express":"*",
-        "mongodb":"*",
-        "json-schema":"*"
+    "name": "AutoCRUD",
+    "version": "0.0.1",
+    "dependencies": {
+        "express": "*",
+        "mongodb": "*",
+        "json-schema": "*"
     },
-    "devDependencies":{
-        "restler":"*",
-        "underscore":"*"
+    "devDependencies": {
+        "restler": "*",
+        "underscore": "*"
     }
 }

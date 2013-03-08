@@ -17,9 +17,9 @@ module.exports = function (options) {
     function echo(req, res) {
         res.statusCode = 200;
         res.json({
-            id:req.params.id,
-            params:req.params,
-            body:req.body
+            id: req.params.id,
+            params: req.params,
+            body: req.body
         });
     }
 
@@ -51,15 +51,15 @@ module.exports = function (options) {
             else {
                 if (limit && skip) cursor.count(function (err, count) {
                     if (err) return respondError(res, err, 500);
-                    else respondSuccess(res, {data:documents, total:count});
+                    else respondSuccess(res, {data: documents, total: count});
                 });
-                else respondSuccess(res, {data:documents, total:documents.length});
+                else respondSuccess(res, {data: documents, total: documents.length});
             }
         });
     });
 
     app.get(rootObjectPath + '/:id', function (req, res) {
-        collection.findOne({_id:ObjectID(req.params.id)}, function (err, document) {
+        collection.findOne({_id: ObjectID(req.params.id)}, function (err, document) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res, document);
         });
