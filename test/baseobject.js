@@ -118,8 +118,21 @@ describe('AutoCRUD', function () {
             });
         });
 
-        it('should post', function () {
-            assert(true);
+        it('should post', function (done) {
+            rest.json(callPrefix + '/hoosit', {
+                name: 'Mittens',
+                description: 'They are for hands.',
+                rating: 5,
+                comments: [
+                    'Gloves might be better.',
+                    'Gloves might not be better.'
+                ]
+            }, null, 'POST')
+                .on('complete', function (data, res) {
+                    assert(res.statusCode === 200);
+                    assert(data._id);
+                    done();
+                });
         });
 
         it('should put by id', function () {

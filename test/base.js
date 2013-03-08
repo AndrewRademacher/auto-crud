@@ -40,58 +40,79 @@ before(function (done) {
             conn.collection('widget', function (err, widget) {
                 if (err) return done(err);
                 mongo.widget = widget;
+                conn.collection('hoosit', function (err, hoosit) {
+                    if (err) return done(err);
+                    mongo.hoosit = hoosit;
 
-                //  Insert valid test data to mongo
-                widget.insert(validPool, function (err, result) {
-                    if (err) return console.log(err);
-                    result.forEach(function (resObj) {
-                        resObj._id = resObj._id.toString();
-                        committedPool.push(resObj);
-                    });
-                    committedPool = _.sortBy(committedPool, '_id');
+                    //  Insert valid test data to mongo
+                    widget.insert(validPool, function (err, result) {
+                        if (err) return console.log(err);
+                        result.forEach(function (resObj) {
+                            resObj._id = resObj._id.toString();
+                            committedPool.push(resObj);
+                        });
+                        committedPool = _.sortBy(committedPool, '_id');
 
-                    //  Create autocrud route
-                    autocrud({
-                        app: app,
-                        collection: mongo.widget,
-                        name: 'widget',
-                        path: '/api',
-                        schema: {
-                            type: 'object',
-                            properties: {
-                                name: {type: 'string', required: true},
-                                dimensions: {
-                                    type: 'object',
-                                    properties: {
-                                        width: {type: 'number', required: true},
-                                        height: {type: 'number', required: true},
-                                        length: {type: 'number', required: true},
-                                        weight: {type: 'number', required: true}
+                        //  Create autocrud route
+                        autocrud({
+                            app: app,
+                            collection: mongo.widget,
+                            name: 'widget',
+                            path: '/api',
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    name: {type: 'string', required: true},
+                                    dimensions: {
+                                        type: 'object',
+                                        properties: {
+                                            width: {type: 'number', required: true},
+                                            height: {type: 'number', required: true},
+                                            length: {type: 'number', required: true},
+                                            weight: {type: 'number', required: true}
+                                        },
+                                        additionalProperties: false
                                     },
-                                    additionalProperties: false
+                                    price: {type: 'number', required: true},
+                                    description: {type: 'string'},
+                                    salePrice: {type: 'number'},
+                                    manufacturer: {
+                                        type: 'object',
+                                        properties: {
+                                            name: {type: 'string'},
+                                            website: {type: 'string'},
+                                            phone: {type: 'string'}
+                                        },
+                                        additionalProperties: false
+                                    }
                                 },
-                                price: {type: 'number', required: true},
-                                description: {type: 'string'},
-                                salePrice: {type: 'number'},
-                                manufacturer: {
-                                    type: 'object',
-                                    properties: {
-                                        name: {type: 'string'},
-                                        website: {type: 'string'},
-                                        phone: {type: 'string'}
-                                    },
-                                    additionalProperties: false
-                                }
-                            },
-                            additionalProperties: false
-                        }
-                    });
+                                additionalProperties: false
+                            }
+                        });
 
-                    //  Open test server
-                    server = http.createServer(app);
-                    server.listen(app.get('port'), function () {
-                        console.log('Express server listening on port ' + app.get('port'));
-                        done();
+                        autocrud({
+                            app: app,
+                            collection: mongo.hoosit,
+                            name: 'hoosit',
+                            path: '/api',
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    name: {type: 'string', required: true},
+                                    description: {type: 'string'},
+                                    rating: {type: 'integer'},
+                                    comments: {type: 'array', items: {type: 'string'}}
+                                },
+                                additionalProperties: false
+                            }
+                        });
+
+                        //  Open test server
+                        server = http.createServer(app);
+                        server.listen(app.get('port'), function () {
+                            console.log('Express server listening on port ' + app.get('port'));
+                            done();
+                        });
                     });
                 });
             });

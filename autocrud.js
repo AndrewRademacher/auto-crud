@@ -66,7 +66,12 @@ module.exports = function (options) {
     });
 
     app.post(rootObjectPath, function (req, res) {
-        echo(req, res);
+        var report = jsonSchema.validate(req.body, schema);
+        if (!report.valid) respondError(res, report.errors, 400);
+        collection.insert(req.body, function (err, document) {
+            if (err) return respondError(res, err, 500);
+            respondSuccess(res, document[0]);
+        });
     });
 
     app.put(rootObjectPath + '/:id', function (req, res) {
