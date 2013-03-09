@@ -1,17 +1,43 @@
 var assert = require('assert');
 
 describe('AutoCRUD', function () {
-    describe('Authentication', function () {
-        it('should be able to deny un authenticated users', function () {
-            assert(true);
+    describe('Security', function () {
+        describe('Ownership', function () {
+            it('should get only when object owner', function (done) {
+                done();
+            });
+
+            it('should put only when object owner', function (done) {
+                done();
+            });
+
+            it('should delete only when object owner', function (done) {
+                done();
+            });
         });
 
-        it('should only manipulate objects that are owned by the user', function () {
-            assert(true);
+        describe('Authentication', function () {
+            it('should connect to an authentication device', function (done) {
+                done();
+            });
         });
 
-        it('should be able to disable functions for different user types', function () {
-            assert(true);
+        describe('Method Permission', function () {
+            it('should only get when role allows', function (done) {
+                done();
+            });
+
+            it('should only post when role allows', function (done) {
+                done();
+            });
+
+            it('should only put when role allows', function (done) {
+                done();
+            });
+
+            it('should only delete when role allows', function (done) {
+                done();
+            });
         });
     });
 });
