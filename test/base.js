@@ -104,6 +104,9 @@ before(function (done) {
                                     comments: {type: 'array', items: {type: 'string'}}
                                 },
                                 additionalProperties: false
+                            },
+                            postTransform: function (body) {
+                                if (!body.rating) body.rating = 1;
                             }
                         });
 

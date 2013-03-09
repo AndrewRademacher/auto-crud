@@ -118,6 +118,7 @@ describe('AutoCRUD', function () {
             });
         });
 
+        var postId;
         it('should post', function (done) {
             rest.json(callPrefix + '/hoosit', {
                 name: 'Mittens',
@@ -131,24 +132,45 @@ describe('AutoCRUD', function () {
                 .on('complete', function (data, res) {
                     assert(res.statusCode === 200);
                     assert(data._id);
+                    postId = data._id;
                     done();
                 });
         });
 
-        it('should put by id', function () {
-            assert(true);
+        it('should post with transform', function (done) {
+            rest.json(callPrefix + '/hoosit', {
+                name: 'Gloves'
+            }, null, 'POST')
+                .on('complete', function (data, res) {
+                    assert(res.statusCode === 200);
+                    assert(data._id);
+                    assert(data.rating);
+                    done();
+                });
         });
 
-        it('should put by search', function () {
-            assert(true);
+        it('should put by id', function (done) {
+            rest.json(callPrefix + '/hoosit/' + postId, {
+                name: 'Mittins',
+                description: 'They are for hands.  And not feet.',
+                rating: 5,
+                comments: [
+                    'Gloves are probably better',
+                    'Gloves are probably not better'
+                ]
+            }, null, 'PUT')
+                .on('complete', function (data, res) {
+                    assert(res.statusCode === 200);
+                    done();
+                });
         });
-
-        it('should delete by id', function () {
-            assert(true);
-        });
-
-        it('should delete by search', function () {
-            assert(true);
+//
+        it('should delete by id', function (done) {
+            rest.json(callPrefix + '/hoosit/' + postId, {}, null, 'DELETE')
+                .on('complete', function (data, res) {
+                    assert(res.statusCode === 200);
+                    done();
+                });
         });
     });
 });

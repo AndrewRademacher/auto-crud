@@ -3,12 +3,15 @@ var ObjectID = require('mongodb').ObjectID,
 
 module.exports = function (options) {
 
-    //  Pull input and defaults
+    //  Establish required options
     var app = options.app,
         collection = options.collection,
         name = options.name,
         path = options.path,
         schema = options.schema;
+
+    var postTransform = options.postTransform,
+        putTransform = options.putTransform;
 
     //  Build path structure
     var rootObjectPath = path + '/' + name;
@@ -67,7 +70,8 @@ module.exports = function (options) {
 
     app.post(rootObjectPath, function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
-        if (!report.valid) respondError(res, report.errors, 400);
+        if (!report.valid) return respondError(res, report.errors, 400);
+        if (postTransform) postTransform(req.body);
         collection.insert(req.body, function (err, document) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res, document[0]);
@@ -75,18 +79,19 @@ module.exports = function (options) {
     });
 
     app.put(rootObjectPath + '/:id', function (req, res) {
-        echo(req, res);
-    });
-
-    app.put(rootObjectPath, function (req, res) {
-        echo(req, res);
+        var report = jsonSchema.validate(req.body, schema);
+        if (!report.valid) return  respondError(res, report.errors, 400);
+        if (putTransform) putTransform(req.body);
+        collection.update({_id: ObjectID(req.params.id)}, {$set: req.body}, function (err) {
+            if (err) return respondError(res, err, 500);
+            respondSuccess(res);
+        });
     });
 
     app.delete(rootObjectPath + '/:id', function (req, res) {
-        echo(req, res);
-    });
-
-    app.delete(rootObjectPath, function (req, res) {
-        echo(req, res);
+        collection.remove({_id: ObjectID(req.params.id)}, function (err) {
+            if (err) return respondError(res, err, 500);
+            respondSuccess(res);
+        });
     });
 };
