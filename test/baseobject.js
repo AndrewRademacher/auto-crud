@@ -164,7 +164,7 @@ describe('AutoCRUD', function () {
                     done();
                 });
         });
-//
+
         it('should delete by id', function (done) {
             rest.json(callPrefix + '/hoosit/' + postId, {}, null, 'DELETE')
                 .on('complete', function (data, res) {
