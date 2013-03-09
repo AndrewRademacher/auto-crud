@@ -11,7 +11,7 @@ module.exports = function (options) {
         schema = options.schema;
 
     var postTransform = (options.postTransform) ? options.postTransform : options.defaultTransform,
-        putTransform = (options.putTransform) ? options.putTransform : options.defaultTranform;
+        putTransform = (options.putTransform) ? options.putTransform : options.defaultTransform;
 
     //  Build path structure
     var rootObjectPath = path + '/' + name;
