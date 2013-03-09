@@ -16,16 +16,6 @@ module.exports = function (options) {
     //  Build path structure
     var rootObjectPath = path + '/' + name;
 
-    //  Drop this function before production
-    function echo(req, res) {
-        res.statusCode = 200;
-        res.json({
-            id: req.params.id,
-            params: req.params,
-            body: req.body
-        });
-    }
-
     function respondError(res, err, code) {
         res.statusCode = code;
         res.json(err);
