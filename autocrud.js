@@ -3,6 +3,17 @@ var ObjectID = require('mongodb').ObjectID,
 
 module.exports = function (options) {
 
+    //  Utility functions
+    var respondError = function (res, err, code) {
+        res.statusCode = code;
+        res.json(err);
+    }
+
+    var respondSuccess = function (res, result) {
+        res.statusCode = 200;
+        res.json(result);
+    }
+
     //  Establish required options
     var app = options.app,
         collection = options.collection,
@@ -10,24 +21,26 @@ module.exports = function (options) {
         path = options.path,
         schema = options.schema;
 
+    //  Optional transform options
     var postTransform = (options.postTransform) ? options.postTransform : options.defaultTransform,
         putTransform = (options.putTransform) ? options.putTransform : options.defaultTransform;
+
+    //  Optional authentication options
+    var getAuthentication = (options.getAuthentication) ? options.getAuthentication : options.defaultAuthentication,
+        postAuthentication = (options.postAuthentication) ? options.postAuthentication : options.defaultAuthentication,
+        putAuthentication = (options.putAuthentication) ? options.putAuthentication : options.defaultAuthentication,
+        deleteAuthentication = (options.deleteAuthentication) ? options.deleteAuthentication : options.defaultAuthentication;
 
     //  Build path structure
     var rootObjectPath = path + '/' + name;
 
-    function respondError(res, err, code) {
-        res.statusCode = code;
-        res.json(err);
-    }
-
-    function respondSuccess(res, result) {
-        res.statusCode = 200;
-        res.json(result);
-    }
-
+    //
     //  Build routes
-    app.get(rootObjectPath, function (req, res) {
+    //
+
+    //  GET
+
+    var getFn = function (req, res) {
         var cursor = collection.find(),
             sort = req.param('sort'),
             limit = req.param('limit'),
@@ -49,16 +62,22 @@ module.exports = function (options) {
                 else respondSuccess(res, {data: documents, total: documents.length});
             }
         });
-    });
+    };
+    if (getAuthentication) app.get(rootObjectPath, getAuthentication, getFn);
+    else app.get(rootObjectPath, getFn);
 
-    app.get(rootObjectPath + '/:id', function (req, res) {
+    var getIdFn = function (req, res) {
         collection.findOne({_id: ObjectID(req.params.id)}, function (err, document) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res, document);
         });
-    });
+    };
+    if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, getIdFn);
+    else app.get(rootObjectPath + '/:id', getIdFn);
 
-    app.post(rootObjectPath, function (req, res) {
+    //  POST
+
+    var postFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return respondError(res, report.errors, 400);
         if (postTransform) postTransform(req.body);
@@ -66,9 +85,13 @@ module.exports = function (options) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res, document[0]);
         });
-    });
+    };
+    if (postAuthentication) app.post(rootObjectPath, postAuthentication, postFn);
+    else app.post(rootObjectPath, postFn);
 
-    app.put(rootObjectPath + '/:id', function (req, res) {
+    //  PUT
+
+    var putIdFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return  respondError(res, report.errors, 400);
         if (putTransform) putTransform(req.body);
@@ -76,12 +99,18 @@ module.exports = function (options) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res);
         });
-    });
+    };
+    if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, putIdFn);
+    else app.put(rootObjectPath + '/:id', putIdFn);
 
-    app.delete(rootObjectPath + '/:id', function (req, res) {
+    //  DELETE
+
+    var deleteIdFn = function (req, res) {
         collection.remove({_id: ObjectID(req.params.id)}, function (err) {
             if (err) return respondError(res, err, 500);
             respondSuccess(res);
         });
-    });
+    };
+    if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, deleteIdFn);
+    else app.delete(rootObjectPath + '/:id', deleteIdFn);
 };
