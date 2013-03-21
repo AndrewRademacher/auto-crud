@@ -7,7 +7,7 @@
         "json-schema": "*"
     },
     "devDependencies": {
-        "restler": "*",
+        "restler": "git://github.com/QuePort/restler.git",
         "underscore": "*"
     }
 }

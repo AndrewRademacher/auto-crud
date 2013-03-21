@@ -62,16 +62,17 @@ describe('AutoCRUD', function () {
         });
 
         describe('Sorted Get', function () {
-            it('should allow format {"price":"asc"}', function (done) {
-                rest.json(callPrefix + '/widget?sort={"price":"asc"}', {}, null, 'GET')
-                    .on('complete', function (data, res) {
-                        assert(res.statusCode === 200);
-                        var sortedCommited = _.sortBy(committedPool, 'price');
-                        for (var i = 0; i < data.data.length; i++)
-                            assert(data.data[i]._id === sortedCommited[i]._id);
-                        done();
-                    });
-            });
+//            THIS FORMAT WAS REMOVED IN BETWEEN MONGO 2.2 AND MONGO 2.4
+//            it('should allow format {"price":"asc"}', function (done) {
+//                rest.json(callPrefix + '/widget?sort={"price":"asc"}', {}, null, 'GET')
+//                    .on('complete', function (data, res) {
+//                        assert(res.statusCode === 200);
+//                        var sortedCommited = _.sortBy(committedPool, 'price');
+//                        for (var i = 0; i < data.data.length; i++)
+//                            assert(data.data[i]._id === sortedCommited[i]._id);
+//                        done();
+//                    });
+//            });
 
             it('should allow format {"price":-1}', function (done) {
                 rest.json(callPrefix + '/widget?sort={"price":-1}', {}, null, 'GET')
