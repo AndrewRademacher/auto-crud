@@ -28,6 +28,104 @@ app.configure('development', function () {
     app.use(express.errorHandler());
 });
 
+function defineAPI(done) {
+    //  Create autocrud route
+    autocrud({
+        app: app,
+        collection: mongo.widget,
+        name: 'widget',
+        path: '/api',
+        schema: {
+            type: 'object',
+            properties: {
+                name: {type: 'string', required: true},
+                dimensions: {
+                    type: 'object',
+                    properties: {
+                        width: {type: 'number', required: true},
+                        height: {type: 'number', required: true},
+                        length: {type: 'number', required: true},
+                        weight: {type: 'number', required: true}
+                    },
+                    additionalProperties: false
+                },
+                price: {type: 'number', required: true},
+                description: {type: 'string'},
+                salePrice: {type: 'number'},
+                manufacturer: {
+                    type: 'object',
+                    properties: {
+                        name: {type: 'string'},
+                        website: {type: 'string'},
+                        phone: {type: 'string'}
+                    },
+                    additionalProperties: false
+                }
+            },
+            additionalProperties: false
+        }
+    });
+
+    autocrud({
+        app: app,
+        collection: mongo.hoosit,
+        name: 'hoosit',
+        path: '/api',
+        schema: {
+            type: 'object',
+            properties: {
+                name: {type: 'string', required: true},
+                description: {type: 'string'},
+                rating: {type: 'integer'},
+                comments: {type: 'array', items: {type: 'string'}}
+            },
+            additionalProperties: false
+        },
+        postTransform: function (body) {
+            if (!body.rating) body.rating = 1;
+        }
+    });
+
+    autocrud({
+        app: app,
+        collection: mongo.user,
+        name: 'user',
+        path: '/api',
+        schema: {
+            type: 'object',
+            properties: {
+                username: {type: 'string', required: true},
+                password: {type: 'string', required: true},
+                roles: {type: 'array', items: {type: 'string'}}
+            },
+            additionalProperties: false
+        }
+    });
+
+    autocrud({
+        app: app,
+        collection: mongo.blog,
+        name: 'blog',
+        path: '/api',
+        schema: {
+            type: 'object',
+            properties: {
+                title: {type: 'string', required: true},
+                entry: {type: 'string', required: true},
+                comments: {type: 'array', items: {type: 'string'}}
+            },
+            additionalProperties: false
+        }
+    });
+
+    //  Open test server
+    server = http.createServer(app);
+    server.listen(app.get('port'), function () {
+        console.log('Express server listening on port ' + app.get('port'));
+        done();
+    });
+}
+
 before(function (done) {
     //  Open mongo connection
     MongoClient.connect('mongodb://localhost:27017/autocrud', function (err, conn) {
@@ -43,78 +141,24 @@ before(function (done) {
                 conn.collection('hoosit', function (err, hoosit) {
                     if (err) return done(err);
                     mongo.hoosit = hoosit;
+                    conn.collection('user', function (err, user) {
+                        if (err) return done(err);
+                        mongo.user = user;
+                        conn.collection('blog', function (err, blog) {
+                            if (err) return done(err);
+                            mongo.blog = blog;
 
-                    //  Insert valid test data to mongo
-                    widget.insert(validPool, function (err, result) {
-                        if (err) return console.log(err);
-                        result.forEach(function (resObj) {
-                            resObj._id = resObj._id.toString();
-                            committedPool.push(resObj);
-                        });
-                        committedPool = _.sortBy(committedPool, '_id');
+                            //  Insert valid test data to mongo
+                            widget.insert(validPool, function (err, result) {
+                                if (err) return console.log(err);
+                                result.forEach(function (resObj) {
+                                    resObj._id = resObj._id.toString();
+                                    committedPool.push(resObj);
+                                });
+                                committedPool = _.sortBy(committedPool, '_id');
 
-                        //  Create autocrud route
-                        autocrud({
-                            app: app,
-                            collection: mongo.widget,
-                            name: 'widget',
-                            path: '/api',
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    name: {type: 'string', required: true},
-                                    dimensions: {
-                                        type: 'object',
-                                        properties: {
-                                            width: {type: 'number', required: true},
-                                            height: {type: 'number', required: true},
-                                            length: {type: 'number', required: true},
-                                            weight: {type: 'number', required: true}
-                                        },
-                                        additionalProperties: false
-                                    },
-                                    price: {type: 'number', required: true},
-                                    description: {type: 'string'},
-                                    salePrice: {type: 'number'},
-                                    manufacturer: {
-                                        type: 'object',
-                                        properties: {
-                                            name: {type: 'string'},
-                                            website: {type: 'string'},
-                                            phone: {type: 'string'}
-                                        },
-                                        additionalProperties: false
-                                    }
-                                },
-                                additionalProperties: false
-                            }
-                        });
-
-                        autocrud({
-                            app: app,
-                            collection: mongo.hoosit,
-                            name: 'hoosit',
-                            path: '/api',
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    name: {type: 'string', required: true},
-                                    description: {type: 'string'},
-                                    rating: {type: 'integer'},
-                                    comments: {type: 'array', items: {type: 'string'}}
-                                },
-                                additionalProperties: false
-                            },
-                            postTransform: function (body) {
-                                if (!body.rating) body.rating = 1;
-                            }
-                        });
-
-                        //  Open test server
-                        server = http.createServer(app);
-                        server.listen(app.get('port'), function () {
-                            console.log('Express server listening on port ' + app.get('port'));
-                            done();
+                                defineAPI(done);
+                            });
                         });
                     });
                 });
