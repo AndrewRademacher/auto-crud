@@ -1,5 +1,3 @@
-auto-crud
-=========
+<h1>auto-crud</h1>
 
-Introduction
-============
+<h2>Introduction</h2>
