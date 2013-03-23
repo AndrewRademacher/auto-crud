@@ -5,16 +5,16 @@ var assert = require('assert'),
 describe('AutoCRUD', function () {
     describe('Security', function () {
 
-        var adminCookie = null,
-            userCookie = null;
+        var adminConfig = null,
+            userConfig = null;
         before(function (done) {
             rest.json(domainPrefix + '/login', {username: 'root', password: '12345'}, null, 'POST')
                 .on('complete', function (data, res) {
-                    adminCookie = res.headers['set-cookie'][0];
+                    adminConfig = {headers: {cookie: res.headers['set-cookie'][0]}};
                     if (res.statusCode === 200 && data.success === true) {
                         rest.json(domainPrefix + '/login', {username: 'andrew', password: '12345'}, null, 'POST')
                             .on('complete', function (data, res) {
-                                userCookie = res.headers['set-cookie'][0];
+                                userConfig = {headers: {cookie: res.headers['set-cookie'][0]}};
                                 if (res.statusCode === 200 && data.success === true) done();
                                 else throw data.err;
                             });
@@ -25,10 +25,6 @@ describe('AutoCRUD', function () {
 
         describe('Ownership', function () {
             it('should get only when object owner', function (done) {
-                assert(adminCookie);
-                assert(userCookie);
-                console.log(adminCookie);
-                console.log(userCookie);
                 done();
             });
 
@@ -48,20 +44,23 @@ describe('AutoCRUD', function () {
         });
 
         describe('Method Permission', function () {
-            it('should only get when role allows', function (done) {
-                done();
+            it('should get when user has admin role', function (done) {
+                rest.json(callPrefix + '/user', {}, adminConfig, 'GET')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        assert(data.total > 0);
+                        assert(data.data.length === data.total);
+                        done();
+                    });
             });
 
-            it('should only post when role allows', function (done) {
-                done();
-            });
-
-            it('should only put when role allows', function (done) {
-                done();
-            });
-
-            it('should only delete when role allows', function (done) {
-                done();
+            it('should not get when user does not have admin role', function (done) {
+                rest.json(callPrefix + '/user', {}, userConfig, 'GET')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 401);
+                        assert(data === 'Unauthenticated');
+                        done();
+                    });
             });
         });
     });
