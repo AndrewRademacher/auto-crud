@@ -5,23 +5,30 @@ var assert = require('assert'),
 describe('AutoCRUD', function () {
     describe('Security', function () {
 
-        var cookie = null;
+        var adminCookie = null,
+            userCookie = null;
         before(function (done) {
-            rest.json(domainPrefix + '/login', {
-                username: 'andrew',
-                password: '12345'
-            }, null, 'POST')
+            rest.json(domainPrefix + '/login', {username: 'root', password: '12345'}, null, 'POST')
                 .on('complete', function (data, res) {
-                    cookie = res.headers['set-cookie'][0];
-                    if (res.statusCode === 200 && data.success === true) done();
+                    adminCookie = res.headers['set-cookie'][0];
+                    if (res.statusCode === 200 && data.success === true) {
+                        rest.json(domainPrefix + '/login', {username: 'andrew', password: '12345'}, null, 'POST')
+                            .on('complete', function (data, res) {
+                                userCookie = res.headers['set-cookie'][0];
+                                if (res.statusCode === 200 && data.success === true) done();
+                                else throw data.err;
+                            });
+                    }
                     else throw data.err;
                 });
         });
 
         describe('Ownership', function () {
             it('should get only when object owner', function (done) {
-                assert(cookie);
-                console.log(cookie);
+                assert(adminCookie);
+                assert(userCookie);
+                console.log(adminCookie);
+                console.log(userCookie);
                 done();
             });
 

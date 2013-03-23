@@ -119,6 +119,10 @@ function defineAPI(done) {
                 roles: {type: 'array', items: {type: 'string'}}
             },
             additionalProperties: false
+        },
+        defaultAuthentication: function (req, res, next) {
+            if (req.isAuthenticated() && _.contains(req.user.roles, 'administrator')) next();
+            else res.send(401, 'Unauthenticated');
         }
     });
 
@@ -184,11 +188,19 @@ before(function (done) {
                                 defineAPI(done);
                             });
 
-                            // Insert valid user to mongo
+                            // Insert valid users to mongo
                             user.insert({
                                 username: 'andrew',
                                 password: '12345',
                                 roles: ['customer']
+                            }, function (err, result) {
+                                if (err) return console.log(err);
+                            });
+
+                            user.insert({
+                                username: 'root',
+                                password: '12345',
+                                roles: ['administrator']
                             }, function (err, result) {
                                 if (err) return console.log(err);
                             });
