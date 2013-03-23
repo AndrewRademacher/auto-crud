@@ -8,6 +8,8 @@
     },
     "devDependencies": {
         "restler": "git://github.com/QuePort/restler.git",
-        "underscore": "*"
+        "underscore": "*",
+        "passport": "*",
+        "passport-local": "*"
     }
 }

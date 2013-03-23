@@ -3,7 +3,9 @@ var express = require('express'),
     path = require('path'),
     MongoClient = require('mongodb').MongoClient,
     schema = require('json-schema'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy;
 
 var autocrud = require('../autocrud');
 
@@ -12,7 +14,23 @@ var app = express(),
     mongo = {};
 
 domain = 'localhost:3000';
+domainPrefix = 'http://' + domain;
 callPrefix = 'http://' + domain + '/api';
+
+passport.use(new LocalStrategy(function (username, password, done) {
+    mongo.user.findOne({username: username, password: password}, function (err, user) {
+        if (err)done(err);
+        else done(null, user);
+    });
+}));
+
+passport.serializeUser(function (user, done) {
+    done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+    done(null, user);
+});
 
 app.configure(function () {
     app.set('port', process.env.PORT || 3000);
@@ -21,6 +39,8 @@ app.configure(function () {
     app.use(express.methodOverride());
     app.use(express.cookieParser('your secret here'));
     app.use(express.session());
+    app.use(passport.initialize());
+    app.use(passport.session());
     app.use(app.router);
 });
 
@@ -118,6 +138,10 @@ function defineAPI(done) {
         }
     });
 
+    app.post('/login', passport.authenticate('local'), function (req, res) {
+        res.json(200, {success: true});
+    });
+
     //  Open test server
     server = http.createServer(app);
     server.listen(app.get('port'), function () {
@@ -158,6 +182,15 @@ before(function (done) {
                                 committedPool = _.sortBy(committedPool, '_id');
 
                                 defineAPI(done);
+                            });
+
+                            // Insert valid user to mongo
+                            user.insert({
+                                username: 'andrew',
+                                password: '12345',
+                                roles: ['customer']
+                            }, function (err, result) {
+                                if (err) return console.log(err);
                             });
                         });
                     });
