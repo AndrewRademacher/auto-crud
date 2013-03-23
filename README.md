@@ -57,7 +57,7 @@ Transform functions take a single parameter, which is the message body after it 
 <h3>Route Authentication</h3>
 No API would be complete without having an authentication mechanism.  This is supported by adding an express middleware
 function to the configuration object.  This allows auto-crud to be agnostic about how users are authenticated.  I tend
-to prefer passport, so that is what is show in the example.
+to prefer passport, so that is what is shown in the example.
 
 ```javascript
 autocrud({
