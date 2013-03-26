@@ -3,17 +3,6 @@ var ObjectID = require('mongodb').ObjectID,
 
 module.exports = function (options) {
 
-    //  Utility functions
-    var respondError = function (res, err, code) {
-        res.statusCode = code;
-        res.json(err);
-    }
-
-    var respondSuccess = function (res, result) {
-        res.statusCode = 200;
-        res.json(result);
-    }
-
     //  Establish required options
     var app = options.app,
         collection = options.collection,
@@ -53,13 +42,13 @@ module.exports = function (options) {
         if (limit) cursor.limit(Number(limit));
         if (limit && skip) cursor.skip(Number(skip));
         cursor.toArray(function (err, documents) {
-            if (err) return respondError(res, err, 500);
+            if (err) return res.json(500, err);
             else {
                 if (limit && skip) cursor.count(function (err, count) {
-                    if (err) return respondError(res, err, 500);
-                    else respondSuccess(res, {data: documents, total: count});
+                    if (err) return res.json(500, err);
+                    res.json({data: documents, total: count});
                 });
-                else respondSuccess(res, {data: documents, total: documents.length});
+                else res.json({data: documents, total: documents.length});
             }
         });
     };
@@ -68,8 +57,8 @@ module.exports = function (options) {
 
     var getIdFn = function (req, res) {
         collection.findOne({_id: ObjectID(req.params.id)}, function (err, document) {
-            if (err) return respondError(res, err, 500);
-            respondSuccess(res, document);
+            if (err) return res.json(500, err);
+            res.json(document);
         });
     };
     if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, getIdFn);
@@ -79,11 +68,11 @@ module.exports = function (options) {
 
     var postFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
-        if (!report.valid) return respondError(res, report.errors, 400);
+        if (!report.valid) return res.json(400, report.errors);
         if (postTransform) postTransform(req.body);
         collection.insert(req.body, function (err, document) {
-            if (err) return respondError(res, err, 500);
-            respondSuccess(res, document[0]);
+            if (err) return res.json(500, err);
+            res.json(document[0]);
         });
     };
     if (postAuthentication) app.post(rootObjectPath, postAuthentication, postFn);
@@ -93,11 +82,11 @@ module.exports = function (options) {
 
     var putIdFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
-        if (!report.valid) return  respondError(res, report.errors, 400);
+        if (!report.valid) return res.json(400, report.errors);
         if (putTransform) putTransform(req.body);
         collection.update({_id: ObjectID(req.params.id)}, {$set: req.body}, function (err) {
-            if (err) return respondError(res, err, 500);
-            respondSuccess(res);
+            if (err) return res.json(500, err);
+            res.send(200);
         });
     };
     if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, putIdFn);
@@ -107,8 +96,8 @@ module.exports = function (options) {
 
     var deleteIdFn = function (req, res) {
         collection.remove({_id: ObjectID(req.params.id)}, function (err) {
-            if (err) return respondError(res, err, 500);
-            respondSuccess(res);
+            if (err) return res.json(500, err);
+            res.send(200);
         });
     };
     if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, deleteIdFn);
