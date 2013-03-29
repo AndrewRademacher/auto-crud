@@ -5,6 +5,8 @@ auto-crud is an abstraction layer for generating REST routes to perform basic CR
 express, mongo and json-schema validation.  The end goal is to define CRUD APIs in a declarative and uniform way
 instead of writing route handlers directly.
 
+<b>Also avalible through NPM: </b> `npm install auto-crud`
+
 <h2>Defining an API</h2>
 The auto-crud module exports a single function which takes a configuration object as its only input.
 
