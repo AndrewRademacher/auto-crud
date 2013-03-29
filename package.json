@@ -1,5 +1,5 @@
 {
-    "name": "AutoCRUD",
+    "name": "auto-crud",
     "version": "0.1.0",
     "description": "A simple tool for automatically generating REST APIs with json schemas and mongodb.",
     "author": "Andrew Rademacher",
