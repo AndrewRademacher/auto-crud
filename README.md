@@ -77,8 +77,9 @@ autocrud({
 
 <h3>Object Ownership</h3>
 Often, the API doesn't need to authenticate users based on any sort of roles, but upon what objects are actually owned
-by the user.  auto-crud provides a facility to automatically tag mongo documens with a value representing the owner.
-Typcially this is the ObjectID of the user in question.
+by the user.  auto-crud provides a facility to automatically tag mongo documents with a value representing the owner.
+Typically this is the ObjectID of the user in question.
+
 ```javascript
 autocrud({
     ... // Default options
