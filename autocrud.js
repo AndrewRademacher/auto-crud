@@ -20,6 +20,19 @@ module.exports = function (options) {
         putAuthentication = (options.putAuthentication) ? options.putAuthentication : options.defaultAuthentication,
         deleteAuthentication = (options.deleteAuthentication) ? options.deleteAuthentication : options.defaultAuthentication;
 
+    //  Optional ownership options
+    var ownerIdFromReq = (options.ownerIdFromReq) ? options.ownerIdFromReq : null,
+        ownerField = (options.ownerField) ? options.ownerField : null;
+
+    //  Query utility
+    var createQuery = (ownerIdFromReq && ownerField) ? function (req, preOwner) {
+        if (!preOwner) preOwner = {};
+        preOwner[ownerField] = ownerIdFromReq(req);
+        return preOwner;
+    } : function (req, preOwner) {
+        return (preOwner) ? preOwner : {};
+    };
+
     //  Build path structure
     var rootObjectPath = path + '/' + name;
 
@@ -30,7 +43,7 @@ module.exports = function (options) {
     //  GET
 
     var getFn = function (req, res) {
-        var cursor = collection.find(),
+        var cursor = collection.find(createQuery(req)),
             sort = req.param('sort'),
             limit = req.param('limit'),
             skip = req.param('skip');
@@ -56,8 +69,9 @@ module.exports = function (options) {
     else app.get(rootObjectPath, getFn);
 
     var getIdFn = function (req, res) {
-        collection.findOne({_id: ObjectID(req.params.id)}, function (err, document) {
+        collection.findOne(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, document) {
             if (err) return res.json(500, err);
+            if (!document) return res.send(404);
             res.json(document);
         });
     };
@@ -70,6 +84,7 @@ module.exports = function (options) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (postTransform) postTransform(req.body);
+        if (ownerIdFromReq && ownerField) req.body[ownerField] = ownerIdFromReq(req);
         collection.insert(req.body, function (err, document) {
             if (err) return res.json(500, err);
             res.json(document[0]);
@@ -84,8 +99,9 @@ module.exports = function (options) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (putTransform) putTransform(req.body);
-        collection.update({_id: ObjectID(req.params.id)}, {$set: req.body}, function (err) {
+        collection.update(createQuery(req, {_id: ObjectID(req.params.id)}), {$set: req.body}, function (err, modCount) {
             if (err) return res.json(500, err);
+            if (modCount === 0) return res.send(404);
             res.send(200);
         });
     };
@@ -95,8 +111,9 @@ module.exports = function (options) {
     //  DELETE
 
     var deleteIdFn = function (req, res) {
-        collection.remove({_id: ObjectID(req.params.id)}, function (err) {
+        collection.remove(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, modCount) {
             if (err) return res.json(500, err);
+            if (modCount === 0) return res.send(404);
             res.send(200);
         });
     };

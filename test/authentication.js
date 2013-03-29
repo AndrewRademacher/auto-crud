@@ -24,22 +24,98 @@ describe('AutoCRUD', function () {
         });
 
         describe('Ownership', function () {
-            it('should get only when object owner', function (done) {
-                done();
+            var adminEntryId = null;
+            it('should attach an owner on post (admin)', function (done) {
+                rest.json(callPrefix + '/blog', {
+                    title: 'Admin Entry',
+                    entry: 'This is a blog post!'
+                }, adminConfig, 'POST')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        assert(data._id);
+                        adminEntryId = data._id;
+                        done();
+                    });
+            });
+
+            var userEntryId = null;
+            it('should attach an owner on post (user)', function (done) {
+                rest.json(callPrefix + '/blog', {
+                    title: 'Entry #1',
+                    entry: 'This is a blog post!'
+                }, userConfig, 'POST')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        assert(data._id);
+                        userEntryId = data._id;
+                        done();
+                    });
+            });
+
+            it('should get only when object owner (list)', function (done) {
+                rest.json(callPrefix + '/blog', {}, userConfig, 'GET')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode);
+                        assert(data.data.length === 1);
+                        assert(data.data[0]._id);
+                        done();
+                    });
+            });
+
+            it('should get only when object owner (single)', function (done) {
+                rest.json(callPrefix + '/blog/' + userEntryId, {}, userConfig, 'GET')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        assert(data._id);
+                        assert(data.owner);
+                        done();
+                    });
+            });
+
+            it('should not get when object is not owned (single)', function (done) {
+                rest.json(callPrefix + '/blog/' + adminEntryId, {}, userConfig, 'GET')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 404);
+                        done();
+                    });
             });
 
             it('should put only when object owner', function (done) {
-                done();
+                rest.json(callPrefix + '/blog/' + userEntryId, {
+                    title: 'Entry #1',
+                    entry: 'This is a modified blog post!'
+                }, userConfig, 'PUT')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        done();
+                    });
+            });
+
+            it('should not put when object is not owned (single)', function (done) {
+                rest.json(callPrefix + '/blog/' + adminEntryId, {
+                    title: 'Admin Entry',
+                    entry: 'This is a modified admin blog post!'
+                }, userConfig, 'PUT')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 404);
+                        done();
+                    });
             });
 
             it('should delete only when object owner', function (done) {
-                done();
+                rest.json(callPrefix + '/blog/' + userEntryId, {}, userConfig, 'DELETE')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 200);
+                        done();
+                    });
             });
-        });
 
-        describe('Authentication', function () {
-            it('should connect to an authentication device', function (done) {
-                done();
+            it('should not delete when object is not owned', function (done) {
+                rest.json(callPrefix + '/blog/' + adminEntryId, {}, userConfig, 'DELETE')
+                    .on('complete', function (data, res) {
+                        assert(res.statusCode === 404);
+                        done();
+                    });
             });
         });
 

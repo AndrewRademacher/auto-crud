@@ -74,3 +74,21 @@ autocrud({
 * `postAuthentication` If specified, this middleware will be applied to the POST HTTP method.  Overrides default.
 * `putAuthentication` If specified, this middleware will be applied to the PUT HTTP method.  Overrides default.
 * `deleteAuthentication` If specified, this middleware will be applied to the DELETE HTTP method.  Overrides default.
+
+<h3>Object Ownership</h3>
+Often, the API doesn't need to authenticate users based on any sort of roles, but upon what objects are actually owned
+by the user.  auto-crud provides a facility to automatically tag mongo documens with a value representing the owner.
+Typcially this is the ObjectID of the user in question.
+```javascript
+autocrud({
+    ... // Default options
+    ownerIdFromReq: function (req) {
+        return new ObjectID(req.user._id);
+    },
+    ownerField: 'owner'
+});
+```
+
+NOTE: Both of the following fields must be provided for object ownership to be enabled.
+* `ownerIdFromReq` A function that extracts the user id value from the request object.  This is passed as the first param.
+* `ownerField` The name of the field in each mongo document that holds the owner id.

@@ -1,6 +1,15 @@
 {
     "name": "AutoCRUD",
-    "version": "0.0.1",
+    "version": "0.1.0",
+    "description": "A simple tool for automatically generating REST APIs with json schemas and mongodb.",
+    "author": "Andrew Rademacher",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/AndrewRademacher/auto-crud.git"
+    },
+    "keywords": [
+        "mongo", "mongodb", "crud", "rest", "express", "json-schema", "validation"
+    ],
     "dependencies": {
         "express": "*",
         "mongodb": "*",

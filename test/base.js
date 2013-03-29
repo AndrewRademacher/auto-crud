@@ -2,6 +2,7 @@ var express = require('express'),
     http = require('http'),
     path = require('path'),
     MongoClient = require('mongodb').MongoClient,
+    ObjectID = require('mongodb').ObjectID,
     schema = require('json-schema'),
     _ = require('underscore'),
     passport = require('passport'),
@@ -139,7 +140,11 @@ function defineAPI(done) {
                 comments: {type: 'array', items: {type: 'string'}}
             },
             additionalProperties: false
-        }
+        },
+        ownerIdFromReq: function (req) {
+            return new ObjectID(req.user._id);
+        },
+        ownerField: 'owner'
     });
 
     app.post('/login', passport.authenticate('local'), function (req, res) {
