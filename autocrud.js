@@ -10,6 +10,12 @@ module.exports = function (options) {
         path = options.path,
         schema = options.schema;
 
+    //  Selection of which routes to create
+    var getCreate = (options.getCreate) ? options.getCreate : true,
+        postCreate = (options.postCreate) ? options.postCreate : true,
+        putCreate = (options.putCreate) ? options.putCreate : true,
+        deleteCreate = (options.deleteCreate) ? options.deleteCreate : true;
+
     //  Optional transform options
     var postTransform = (options.postTransform) ? options.postTransform : options.defaultTransform,
         putTransform = (options.putTransform) ? options.putTransform : options.defaultTransform;
@@ -42,7 +48,7 @@ module.exports = function (options) {
 
     //  GET
 
-    var getFn = function (req, res) {
+    var getRouteFn = function (req, res) {
         var cursor = collection.find(createQuery(req)),
             sort = req.param('sort'),
             limit = req.param('limit'),
@@ -65,22 +71,26 @@ module.exports = function (options) {
             }
         });
     };
-    if (getAuthentication) app.get(rootObjectPath, getAuthentication, getFn);
-    else app.get(rootObjectPath, getFn);
+    if (getCreate) {
+        if (getAuthentication) app.get(rootObjectPath, getAuthentication, getRouteFn);
+        else app.get(rootObjectPath, getRouteFn);
+    }
 
-    var getIdFn = function (req, res) {
+    var getIdRouteFn = function (req, res) {
         collection.findOne(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, document) {
             if (err) return res.json(500, err);
             if (!document) return res.send(404);
             res.json(document);
         });
     };
-    if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, getIdFn);
-    else app.get(rootObjectPath + '/:id', getIdFn);
+    if (getCreate) {
+        if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, getIdRouteFn);
+        else app.get(rootObjectPath + '/:id', getIdRouteFn);
+    }
 
     //  POST
 
-    var postFn = function (req, res) {
+    var postRouteFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (postTransform) postTransform(req.body);
@@ -90,12 +100,14 @@ module.exports = function (options) {
             res.json(document[0]);
         });
     };
-    if (postAuthentication) app.post(rootObjectPath, postAuthentication, postFn);
-    else app.post(rootObjectPath, postFn);
+    if (postCreate) {
+        if (postAuthentication) app.post(rootObjectPath, postAuthentication, postRouteFn);
+        else app.post(rootObjectPath, postRouteFn);
+    }
 
     //  PUT
 
-    var putIdFn = function (req, res) {
+    var putIdRouteFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (putTransform) putTransform(req.body);
@@ -105,18 +117,22 @@ module.exports = function (options) {
             res.send(200);
         });
     };
-    if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, putIdFn);
-    else app.put(rootObjectPath + '/:id', putIdFn);
+    if (putCreate) {
+        if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, putIdRouteFn);
+        else app.put(rootObjectPath + '/:id', putIdRouteFn);
+    }
 
     //  DELETE
 
-    var deleteIdFn = function (req, res) {
+    var deleteIdRouteFn = function (req, res) {
         collection.remove(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, modCount) {
             if (err) return res.json(500, err);
             if (modCount === 0) return res.send(404);
             res.send(200);
         });
     };
-    if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, deleteIdFn);
-    else app.delete(rootObjectPath + '/:id', deleteIdFn);
+    if (deleteCreate) {
+        if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, deleteIdRouteFn);
+        else app.delete(rootObjectPath + '/:id', deleteIdRouteFn);
+    }
 };
