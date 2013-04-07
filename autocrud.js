@@ -1,7 +1,8 @@
 var ObjectID = require('mongodb').ObjectID,
     jsonSchema = require('json-schema');
 
-module.exports = function (options) {
+module.exports = function Autocrud(options) {
+    if (!(this instanceof Autocrud)) return new Autocrud(options);
 
     //  Establish required options
     var app = options.app,
@@ -48,7 +49,7 @@ module.exports = function (options) {
 
     //  GET
 
-    var getRouteFn = function (req, res) {
+    this.getRouteFn = function (req, res) {
         var cursor = collection.find(createQuery(req)),
             sort = req.param('sort'),
             limit = req.param('limit'),
@@ -72,11 +73,11 @@ module.exports = function (options) {
         });
     };
     if (getCreate) {
-        if (getAuthentication) app.get(rootObjectPath, getAuthentication, getRouteFn);
-        else app.get(rootObjectPath, getRouteFn);
+        if (getAuthentication) app.get(rootObjectPath, getAuthentication, this.getRouteFn);
+        else app.get(rootObjectPath, this.getRouteFn);
     }
 
-    var getIdRouteFn = function (req, res) {
+    this.getIdRouteFn = function (req, res) {
         collection.findOne(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, document) {
             if (err) return res.json(500, err);
             if (!document) return res.send(404);
@@ -84,13 +85,13 @@ module.exports = function (options) {
         });
     };
     if (getCreate) {
-        if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, getIdRouteFn);
-        else app.get(rootObjectPath + '/:id', getIdRouteFn);
+        if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, this.getIdRouteFn);
+        else app.get(rootObjectPath + '/:id', this.getIdRouteFn);
     }
 
     //  POST
 
-    var postRouteFn = function (req, res) {
+    this.postRouteFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (postTransform) postTransform(req.body);
@@ -101,13 +102,13 @@ module.exports = function (options) {
         });
     };
     if (postCreate) {
-        if (postAuthentication) app.post(rootObjectPath, postAuthentication, postRouteFn);
-        else app.post(rootObjectPath, postRouteFn);
+        if (postAuthentication) app.post(rootObjectPath, postAuthentication, this.postRouteFn);
+        else app.post(rootObjectPath, this.postRouteFn);
     }
 
     //  PUT
 
-    var putIdRouteFn = function (req, res) {
+    this.putIdRouteFn = function (req, res) {
         var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (putTransform) putTransform(req.body);
@@ -118,13 +119,13 @@ module.exports = function (options) {
         });
     };
     if (putCreate) {
-        if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, putIdRouteFn);
-        else app.put(rootObjectPath + '/:id', putIdRouteFn);
+        if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, this.putIdRouteFn);
+        else app.put(rootObjectPath + '/:id', this.putIdRouteFn);
     }
 
     //  DELETE
 
-    var deleteIdRouteFn = function (req, res) {
+    this.deleteIdRouteFn = function (req, res) {
         collection.remove(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, modCount) {
             if (err) return res.json(500, err);
             if (modCount === 0) return res.send(404);
@@ -132,7 +133,7 @@ module.exports = function (options) {
         });
     };
     if (deleteCreate) {
-        if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, deleteIdRouteFn);
-        else app.delete(rootObjectPath + '/:id', deleteIdRouteFn);
+        if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, this.deleteIdRouteFn);
+        else app.delete(rootObjectPath + '/:id', this.deleteIdRouteFn);
     }
 };
