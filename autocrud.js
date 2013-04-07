@@ -78,11 +78,16 @@ module.exports = function Autocrud(options) {
     }
 
     this.getIdRouteFn = function (req, res) {
-        collection.findOne(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, document) {
-            if (err) return res.json(500, err);
-            if (!document) return res.send(404);
-            res.json(document);
-        });
+        try {
+            var _id = new ObjectID(req.params.id);
+            collection.findOne(createQuery(req, {_id: _id}), function (err, document) {
+                if (err) return res.json(500, err);
+                if (!document) return res.send(404);
+                res.json(document);
+            });
+        } catch (err) {
+            res.json(400, err);
+        }
     };
     if (getCreate) {
         if (getAuthentication) app.get(rootObjectPath + '/:id', getAuthentication, this.getIdRouteFn);
@@ -109,14 +114,19 @@ module.exports = function Autocrud(options) {
     //  PUT
 
     this.putIdRouteFn = function (req, res) {
-        var report = jsonSchema.validate(req.body, schema);
-        if (!report.valid) return res.json(400, report.errors);
-        if (putTransform) putTransform(req.body);
-        collection.update(createQuery(req, {_id: ObjectID(req.params.id)}), {$set: req.body}, function (err, modCount) {
-            if (err) return res.json(500, err);
-            if (modCount === 0) return res.send(404);
-            res.send(200);
-        });
+        try {
+            var _id = new ObjectID(req.params.id);
+            var report = jsonSchema.validate(req.body, schema);
+            if (!report.valid) return res.json(400, report.errors);
+            if (putTransform) putTransform(req.body);
+            collection.update(createQuery(req, {_id: _id}), {$set: req.body}, function (err, modCount) {
+                if (err) return res.json(500, err);
+                if (modCount === 0) return res.send(404);
+                res.send(200);
+            });
+        } catch (err) {
+            res.json(400, err);
+        }
     };
     if (putCreate) {
         if (putAuthentication) app.put(rootObjectPath + '/:id', putAuthentication, this.putIdRouteFn);
@@ -126,11 +136,16 @@ module.exports = function Autocrud(options) {
     //  DELETE
 
     this.deleteIdRouteFn = function (req, res) {
-        collection.remove(createQuery(req, {_id: ObjectID(req.params.id)}), function (err, modCount) {
-            if (err) return res.json(500, err);
-            if (modCount === 0) return res.send(404);
-            res.send(200);
-        });
+        try {
+            var _id = new ObjectID(req.params.id);
+            collection.remove(createQuery(req, {_id: _id}), function (err, modCount) {
+                if (err) return res.json(500, err);
+                if (modCount === 0) return res.send(404);
+                res.send(200);
+            });
+        } catch (err) {
+            res.json(400, err);
+        }
     };
     if (deleteCreate) {
         if (deleteAuthentication) app.delete(rootObjectPath + '/:id', deleteAuthentication, this.deleteIdRouteFn);
