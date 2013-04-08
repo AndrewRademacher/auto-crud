@@ -3,9 +3,10 @@ var sys = require('sys'),
     ObjectID = require('mongodb').ObjectID,
     jsonSchema = require('json-schema');
 
-module.exports = function Autocrud(options) {
+function Autocrud(options) {
     if (!(this instanceof Autocrud)) return new Autocrud(options);
     events.EventEmitter.call(this);
+    var $this = this;
 
     //  Establish required options
     var app = options.app,
@@ -53,8 +54,7 @@ module.exports = function Autocrud(options) {
     //  GET
 
     this.getRouteFn = function (req, res) {
-        var self = this,
-            cursor = collection.find(createQuery(req)),
+        var cursor = collection.find(createQuery(req)),
             sort = req.param('sort'),
             limit = req.param('limit'),
             skip = req.param('skip');
@@ -71,11 +71,11 @@ module.exports = function Autocrud(options) {
                 if (limit && skip) cursor.count(function (err, count) {
                     if (err) return res.json(500, err);
                     res.json({data: documents, total: count});
-                    self.emit('get', documents, count);
+                    $this.emit('get', documents, count);
                 });
                 else {
                     res.json({data: documents, total: documents.length});
-                    self.emit('get', documents, documents.length);
+                    $this.emit('get', documents, documents.length);
                 }
             }
         });
@@ -87,13 +87,12 @@ module.exports = function Autocrud(options) {
 
     this.getIdRouteFn = function (req, res) {
         try {
-            var self = this,
-                _id = new ObjectID(req.params.id);
+            var _id = new ObjectID(req.params.id);
             collection.findOne(createQuery(req, {_id: _id}), function (err, document) {
                 if (err) return res.json(500, err);
                 if (!document) return res.send(404);
                 res.json(document);
-                self.emit('getId', _id, document);
+                $this.emit('getId', _id, document);
             });
         } catch (err) {
             res.json(400, err);
@@ -107,15 +106,14 @@ module.exports = function Autocrud(options) {
     //  POST
 
     this.postRouteFn = function (req, res) {
-        var self = this,
-            report = jsonSchema.validate(req.body, schema);
+        var report = jsonSchema.validate(req.body, schema);
         if (!report.valid) return res.json(400, report.errors);
         if (postTransform) postTransform(req.body);
         if (ownerIdFromReq && ownerField) req.body[ownerField] = ownerIdFromReq(req);
         collection.insert(req.body, function (err, document) {
             if (err) return res.json(500, err);
             res.json(document[0]);
-            self.emit('post', document[0]);
+            $this.emit('post', document[0]);
         });
     };
     if (postCreate) {
@@ -127,8 +125,7 @@ module.exports = function Autocrud(options) {
 
     this.putIdRouteFn = function (req, res) {
         try {
-            var self = this,
-                _id = new ObjectID(req.params.id),
+            var _id = new ObjectID(req.params.id),
                 report = jsonSchema.validate(req.body, schema);
             if (!report.valid) return res.json(400, report.errors);
             if (putTransform) putTransform(req.body);
@@ -136,7 +133,7 @@ module.exports = function Autocrud(options) {
                 if (err) return res.json(500, err);
                 if (modCount === 0) return res.send(404);
                 res.send(200);
-                self.emit('putId', _id, req.body, modCount);
+                $this.emit('putId', _id, req.body, modCount);
             });
         } catch (err) {
             res.json(400, err);
@@ -151,13 +148,12 @@ module.exports = function Autocrud(options) {
 
     this.deleteIdRouteFn = function (req, res) {
         try {
-            var self = this,
-                _id = new ObjectID(req.params.id);
+            var _id = new ObjectID(req.params.id);
             collection.remove(createQuery(req, {_id: _id}), function (err, modCount) {
                 if (err) return res.json(500, err);
                 if (modCount === 0) return res.send(404);
                 res.send(200);
-                self.emit('deleteId', _id, modCount);
+                $this.emit('deleteId', _id, modCount);
             });
         } catch (err) {
             res.json(400, err);
@@ -169,3 +165,4 @@ module.exports = function Autocrud(options) {
     }
 };
 sys.inherits(Autocrud, events.EventEmitter);
+module.exports = Autocrud;
