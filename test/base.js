@@ -8,7 +8,7 @@ var express = require('express'),
     passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy;
 
-var autocrud = require('../autocrud');
+var autocrud = require('../lib/autocrud');
 
 var app = express(),
     server,
