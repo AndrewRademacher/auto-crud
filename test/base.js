@@ -18,11 +18,18 @@ domain = 'localhost:3000';
 domainPrefix = 'http://' + domain;
 callPrefix = 'http://' + domain + '/api';
 
-passport.use(new LocalStrategy(function (username, password, done) {
+passport.use('local', new LocalStrategy(function (username, password, done) {
     mongo.user.findOne({username: username, password: password}, function (err, user) {
-        if (err)done(err);
+        if (err) done(err);
         else done(null, user);
     });
+}));
+
+passport.use('owned', new LocalStrategy(function(username, password, done) {
+	mongo.owned.findOne({username: username, password: password}, function(err, user) {
+		if (err) done(err);
+		else done(null, user);
+	});
 }));
 
 passport.serializeUser(function (user, done) {
@@ -147,9 +154,33 @@ function defineAPI(done) {
         ownerField: 'owner'
     });
 
+	autocrud({
+		app: app,
+		collection: mongo.owned,
+		name: 'owned',
+		path: '/api',
+		schema: {
+			type: 'object',
+			properties: {
+				username: {type:'string', required:true},
+				password: {type:'string', required:true},
+				email: {type:'string'}
+			},
+			additionalProperties: false
+		},
+		ownerIdFromReq: function(req) {
+			return new ObjectID(req.user._id);
+		},
+		ownerSelf: true
+	});
+
     app.post('/login', passport.authenticate('local'), function (req, res) {
         res.json(200, {success: true});
     });
+	
+	app.post('/login/owned', passport.authenticate('owned'), function(req, res) {
+		res.json(200, {success: true});
+	});
 
     //  Open test server
     server = http.createServer(app);
@@ -180,35 +211,39 @@ before(function (done) {
                         conn.collection('blog', function (err, blog) {
                             if (err) return done(err);
                             mongo.blog = blog;
+							conn.collection('owned', function(err, owned) {
+								if (err) return done(err);
+								mongo.owned = owned;
+							
+	                            //  Insert valid test data to mongo
+	                            widget.insert(validPool, function (err, result) {
+	                                if (err) return console.log(err);
+	                                result.forEach(function (resObj) {
+	                                    resObj._id = resObj._id.toString();
+	                                    committedPool.push(resObj);
+	                                });
+	                                committedPool = _.sortBy(committedPool, '_id');
 
-                            //  Insert valid test data to mongo
-                            widget.insert(validPool, function (err, result) {
-                                if (err) return console.log(err);
-                                result.forEach(function (resObj) {
-                                    resObj._id = resObj._id.toString();
-                                    committedPool.push(resObj);
-                                });
-                                committedPool = _.sortBy(committedPool, '_id');
+	                                defineAPI(done);
+		                        });
 
-                                defineAPI(done);
-                            });
+	                            // Insert valid users to mongo
+	                            user.insert({
+	                                username: 'andrew',
+	                                password: '12345',
+	                                roles: ['customer']
+	                            }, function (err, result) {
+	                                if (err) return console.log(err);
+								});
 
-                            // Insert valid users to mongo
-                            user.insert({
-                                username: 'andrew',
-                                password: '12345',
-                                roles: ['customer']
-                            }, function (err, result) {
-                                if (err) return console.log(err);
-                            });
-
-                            user.insert({
-                                username: 'root',
-                                password: '12345',
-                                roles: ['administrator']
-                            }, function (err, result) {
-                                if (err) return console.log(err);
-                            });
+							    user.insert({
+						            username: 'root',
+					                password: '12345',
+				                    roles: ['administrator']
+			                    }, function (err, result) {
+		                            if (err) return console.log(err);
+	                            });
+							});
                         });
                     });
                 });

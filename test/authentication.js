@@ -119,6 +119,72 @@ describe('AutoCRUD', function () {
             });
         });
 
+		describe('Self Ownership', function() {
+			it('should post without prior authentication', function(done) {
+				rest.json(callPrefix + '/owned', {
+					username: 'testuser',
+					password: 'password'
+				}, null, 'POST')
+					.on('complete', function(data, res) {
+						assert(res.statusCode === 200);
+						assert(data.username === 'testuser');
+						assert(data.password === 'password');
+						assert(data._id);
+						done();
+					});
+			});
+
+			var userConfig = null;
+			it('should login as owned user', function(done) {
+				rest.json(domainPrefix + '/login/owned', {username: 'testuser', password: 'password'},
+					null, 'POST')
+					.on('complete', function(data, res) {
+						userConfig = {headers: {cookie: res.headers['set-cookie'][0]}};
+						assert(data.success === true);
+						assert(res.statusCode === 200);
+						done();
+					});
+			});
+
+			it('should allow a user to view self', function(done) {
+				rest.json(callPrefix + '/owned', {}, userConfig, 'GET')
+					.on('complete', function(data, res) {
+						assert(data.total === 1);
+						assert(data.data[0].username === 'testuser');
+						assert(data.data[0].password === 'password');
+						done();
+					});
+			});
+
+			it('should allow user to edit self', function(done) {
+				rest.json(callPrefix + '/owned', {}, userConfig, 'GET')
+					.on('complete', function(data, res) {
+						assert(res.statusCode === 200);
+						rest.json(callPrefix + '/owned/' + data.data[0]._id, {
+							username: data.data[0].username,
+							password: data.data[0].password,
+							email: 'testuser@company.com'
+						}, userConfig, 'PUT')
+							.on('complete', function(data, res) {
+								assert(res.statusCode === 200);
+								done();
+							});
+					});
+			});
+
+			it('should allow user to delete self', function(done) {
+				rest.json(callPrefix + '/owned', {}, userConfig, 'GET')
+					.on('complete', function(data, res) {
+						assert(res.statusCode === 200);
+						rest.json(callPrefix + '/owned/' + data.data[0]._id, {}, userConfig, 'DELETE')
+							.on('complete', function(data, res) {
+								assert(res.statusCode === 200);
+								done();
+							});
+					});
+			});
+		});
+
         describe('Method Permission', function () {
             it('should get when user has admin role', function (done) {
                 rest.json(callPrefix + '/user', {}, adminConfig, 'GET')

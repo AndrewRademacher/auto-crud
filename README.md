@@ -5,7 +5,7 @@ auto-crud is an abstraction layer for generating REST routes to perform basic CR
 express, mongo and json-schema validation.  The end goal is to define CRUD APIs in a declarative and uniform way
 instead of writing route handlers directly.
 
-<b>Also avalible through NPM: </b> `npm install auto-crud`
+<b>Also available through NPM: </b> `npm install auto-crud`
 
 <h2>Defining an API</h2>
 The auto-crud module exports a single function which takes a configuration object as its only input.
@@ -100,10 +100,27 @@ autocrud({
     ownerField: 'owner'
 });
 ```
+It is also possible to tell autocrud that objects own themselves.  This is useful for the case in which you have a user
+object, as a user should be able to edit itself and only itself.  When an object owns itself, the POST method does not
+require authentication to use.  This allows new users registering with your site to create an account, then login to
+modify it.  NOTE: You cannot specify ownerSelf and ownerField at the same time. When an object owns itself, its
+ownerField is always its own "_id" field.
 
-NOTE: Both of the following fields must be provided for object ownership to be enabled.
+```javascript
+autocrud({
+	... // Default options
+	ownerIdFromReq: function (req) {
+		return new ObjectID(req.user._id);
+	}
+	ownerSelf: true
+});
+``)`
+
+NOTE: To enable object ownership the `ownerIdFromReq` field and either the `ownerField` or `ownerSelf` fields must be
+provided.  You cannot use `ownerField` and `ownerSelf` at the same time.
 * `ownerIdFromReq` A function that extracts the user id value from the request object.  This is passed as the first param.
 * `ownerField` The name of the field in each mongo document that holds the owner id.
+* `ownerSelf` If true the object uses its own "_id" field as its ownerField.
 
 <h2>Events</h2>
 There are a handful of events that will be fired with http calls to the Autocrud object.
