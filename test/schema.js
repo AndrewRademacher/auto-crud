@@ -1,42 +1,24 @@
-var _ = require('underscore'),
-	assert = require('assert'),
-	getMongoProjection = require('../lib/schema').getMongoProjection;
+var assert = require('assert'),
+	rest = require('restler'),
+	_ = require('underscore');
 
-var sampleSchema = {
-	type: 'object',
-	additionalProperties: false,
-	properties: {
-		username: {type:'string', required: true},
-		password: {type:'string', required: true, hidden: true},
-		stripe: {
-			type: 'object',
-			additionalProperties: false,
-			properties: {
-				stripeId: {type:'string', required: true},
-				stripeKey: {type:'string', required: true, hidden: true}
-			}
-		},
-		subUsers: {
-			type: 'array',
-			items: {
-				type: 'object',
-				additionalProperties: false,
-				properties: {
-					username: {type:'string', required: true},
-					password: {type:'string', required: true, hidden: true}
-				}
-			}
-		}
-	}
-};
-
-describe('Schema Manipulation', function() {
-	it('should generate a mongo projection', function() {
-		var projection = getMongoProjection(sampleSchema);
-		assert(_.isEqual(projection, {
-			'password': 0,
-			'stripe.stripeKey': 0,
-			'subUsers.password': 0
-		}));
+describe('Schema Modification', function() {
+	describe('Projection', function() {
+		it('should not return hidden fields in GET calls', function(done) {
+			rest.json(callPrefix + '/schema', {
+				username: 'testuser',
+				password: 'pass'
+			}, null, 'POST')
+				.on('complete', function(data, res) {
+					assert(res.statusCode === 200);
+					
+					rest.json(callPrefix + '/schema/' + data._id, null, null, 'GET')
+						.on('complete', function(data, res) {
+							assert(data.username);
+							assert(!data.password);
+							done();
+						});
+				});
+		});
 	});
 });

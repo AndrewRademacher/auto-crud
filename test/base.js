@@ -174,6 +174,21 @@ function defineAPI(done) {
 		ownerSelf: true
 	});
 
+	autocrud({
+		app: app,
+		collection: mongo.schema,
+		name: 'schema',
+		path: '/api',
+		schema: {
+			type: 'object',
+			properties: {
+				username: {type:'string', required:true},
+				password: {type:'string', required:true, hidden:true}
+			},
+			additionalProperties: false
+		}
+	});
+
     app.post('/login', passport.authenticate('local'), function (req, res) {
         res.json(200, {success: true});
     });
@@ -214,35 +229,39 @@ before(function (done) {
 							conn.collection('owned', function(err, owned) {
 								if (err) return done(err);
 								mongo.owned = owned;
-							
-	                            //  Insert valid test data to mongo
-	                            widget.insert(validPool, function (err, result) {
-	                                if (err) return console.log(err);
-	                                result.forEach(function (resObj) {
-	                                    resObj._id = resObj._id.toString();
-	                                    committedPool.push(resObj);
-	                                });
-	                                committedPool = _.sortBy(committedPool, '_id');
+								conn.collection('schema', function(err, schema) {
+									if (err) return done(err);
+									mongo.schema = schema;
 
-	                                defineAPI(done);
-		                        });
+		                            //  Insert valid test data to mongo
+		                            widget.insert(validPool, function (err, result) {
+		                                if (err) return console.log(err);
+		                                result.forEach(function (resObj) {
+		                                    resObj._id = resObj._id.toString();
+		                                    committedPool.push(resObj);
+		                                });
+		                                committedPool = _.sortBy(committedPool, '_id');
+	
+		                                defineAPI(done);
+			                        });
 
-	                            // Insert valid users to mongo
-	                            user.insert({
-	                                username: 'andrew',
-	                                password: '12345',
-	                                roles: ['customer']
-	                            }, function (err, result) {
-	                                if (err) return console.log(err);
+		                            // Insert valid users to mongo
+		                            user.insert({
+		                                username: 'andrew',
+		                                password: '12345',
+		                                roles: ['customer']
+		                            }, function (err, result) {
+		                                if (err) return console.log(err);
+									});
+
+								    user.insert({
+							            username: 'root',
+						                password: '12345',
+					                    roles: ['administrator']
+				                    }, function (err, result) {
+			                            if (err) return console.log(err);
+		                            });
 								});
-
-							    user.insert({
-						            username: 'root',
-					                password: '12345',
-				                    roles: ['administrator']
-			                    }, function (err, result) {
-		                            if (err) return console.log(err);
-	                            });
 							});
                         });
                     });
