@@ -30,6 +30,7 @@
         "restler": "git://github.com/QuePort/restler.git",
         "passport": "*",
         "passport-local": "*",
-        "sync": "~0.2.2"
+        "sync": "~0.2.2",
+        "mocha": "~1.12.1"
     }
 }
