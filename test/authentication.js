@@ -127,8 +127,6 @@ describe('AutoCRUD', function () {
 				}, null, 'POST')
 					.on('complete', function(data, res) {
 						assert(res.statusCode === 200);
-						assert(data.username === 'testuser');
-						assert(data.password === 'password');
 						assert(data._id);
 						done();
 					});

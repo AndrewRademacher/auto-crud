@@ -1,6 +1,7 @@
 var assert = require('assert'),
     rest = require('restler'),
-    _ = require('underscore');
+    _ = require('underscore'),
+	ObjectID = require('mongodb').ObjectID;
 
 describe('AutoCRUD', function () {
     describe('Simple Object', function () {
@@ -139,14 +140,17 @@ describe('AutoCRUD', function () {
         });
 
         it('should post with transform', function (done) {
-            rest.json(callPrefix + '/hoosit', {
+			rest.json(callPrefix + '/hoosit', {
                 name: 'Gloves'
             }, null, 'POST')
                 .on('complete', function (data, res) {
-                    assert(res.statusCode === 200);
+					assert(res.statusCode === 200);
                     assert(data._id);
-                    assert(data.rating);
-                    done();
+					mongo.hoosit.findOne({_id: new ObjectID(data._id)}, function(err, document) {
+						if (err) return done(err);
+						assert(document.rating);
+						done();
+					});
                 });
         });
 
