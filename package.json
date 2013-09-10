@@ -1,32 +1,36 @@
 {
-  "name": "auto-crud",
-  "version": "0.2.6",
-  "description": "A simple tool for automatically generating REST APIs with json schemas and mongodb.",
-  "author": "Andrew Rademacher",
-  "main": "lib/autocrud.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/AndrewRademacher/auto-crud.git"
-  },
-  "keywords": [
-    "mongo",
-    "mongodb",
-    "crud",
-    "rest",
-    "express",
-    "json-schema",
-    "validation"
-  ],
-  "dependencies": {
-    "express": "*",
-    "mongodb": "*",
-    "json-schema": "*",
-    "underscore": "~1.5.2"
-  },
-  "devDependencies": {
-    "restler": "git://github.com/QuePort/restler.git",
-    "passport": "*",
-    "passport-local": "*",
-    "sync": "~0.2.2"
-  }
+    "name": "auto-crud",
+    "version": "0.2.6",
+    "description": "A simple tool for automatically generating REST APIs with json schemas and mongodb.",
+    "author": "Andrew Rademacher",
+    "main": "lib/autocrud.js",
+    "scripts": {
+        "test": "mocha -R spec"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/AndrewRademacher/auto-crud.git"
+    },
+    "keywords": [
+            "mongo",
+            "mongodb",
+            "crud",
+            "rest",
+            "express",
+            "json-schema",
+            "validation"
+    ],
+    "dependencies": {
+        "express": "*",
+        "mongodb": "*",
+        "json-schema": "*",
+        "underscore": "~1.5.2"
+    },
+    "devDependencies": {
+        "restler": "git://github.com/QuePort/restler.git",
+        "passport": "*",
+        "passport-local": "*",
+        "sync": "~0.2.2",
+        "mocha": "~1.12.1"
+    }
 }
