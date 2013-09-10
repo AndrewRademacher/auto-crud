@@ -20,11 +20,11 @@
   "dependencies": {
     "express": "*",
     "mongodb": "*",
-    "json-schema": "*"
+    "json-schema": "*",
+    "underscore": "~1.5.2"
   },
   "devDependencies": {
     "restler": "git://github.com/QuePort/restler.git",
-    "underscore": "*",
     "passport": "*",
     "passport-local": "*",
     "sync": "~0.2.2"
