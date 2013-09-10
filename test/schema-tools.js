@@ -30,7 +30,7 @@ var sampleSchema = {
 	}
 };
 
-describe('Schema Manipulation', function() {
+describe('Schema Manipulation (Library)', function() {
 	it('should generate a mongo projection', function() {
 		var projection = getMongoProjection(sampleSchema);
 		assert(_.isEqual(projection, {
