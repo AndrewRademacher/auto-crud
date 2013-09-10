@@ -5,6 +5,7 @@ var express = require('express'),
     ObjectID = require('mongodb').ObjectID,
     schema = require('json-schema'),
     _ = require('underscore'),
+	Sync = require('sync'),
     passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy;
 
@@ -206,69 +207,37 @@ function defineAPI(done) {
 }
 
 before(function (done) {
-    //  Open mongo connection
-    MongoClient.connect('mongodb://localhost:27017/autocrud', function (err, conn) {
-        if (err) return done(err);
-        mongo.connection = conn;
+	Sync(function() {
+		//	Open mongo connection
+		var m = mongo;
+			conn = MongoClient.connect.sync(null, 'mongodb://localhost:27017/autocrud');
+		mongo.connection = conn;
+		conn.dropDatabase.sync(conn);
 
-        //  Prime mongo
-        conn.dropDatabase(function (err) {
-            if (err) return done(err);
-            conn.collection('widget', function (err, widget) {
-                if (err) return done(err);
-                mongo.widget = widget;
-                conn.collection('hoosit', function (err, hoosit) {
-                    if (err) return done(err);
-                    mongo.hoosit = hoosit;
-                    conn.collection('user', function (err, user) {
-                        if (err) return done(err);
-                        mongo.user = user;
-                        conn.collection('blog', function (err, blog) {
-                            if (err) return done(err);
-                            mongo.blog = blog;
-							conn.collection('owned', function(err, owned) {
-								if (err) return done(err);
-								mongo.owned = owned;
-								conn.collection('schema', function(err, schema) {
-									if (err) return done(err);
-									mongo.schema = schema;
+		//	Prime mongo
+		_.map(['widget', 'hoosit', 'user', 'blog', 'owned', 'schema'], function(c) {
+			mongo[c] = conn.collection.sync(conn, c);
+		});
 
-		                            //  Insert valid test data to mongo
-		                            widget.insert(validPool, function (err, result) {
-		                                if (err) return console.log(err);
-		                                result.forEach(function (resObj) {
-		                                    resObj._id = resObj._id.toString();
-		                                    committedPool.push(resObj);
-		                                });
-		                                committedPool = _.sortBy(committedPool, '_id');
-	
-		                                defineAPI(done);
-			                        });
+        //  Insert valid test data to mongo
+		committedPool = _.sortBy(_.map(m.widget.insert.sync(m.widget, validPool), function(w) {
+			w._id = w._id.toString();
+			return w;
+		}), '_id');
 
-		                            // Insert valid users to mongo
-		                            user.insert({
-		                                username: 'andrew',
-		                                password: '12345',
-		                                roles: ['customer']
-		                            }, function (err, result) {
-		                                if (err) return console.log(err);
-									});
+		// Insert valid users to mongo
+		m.user.insert.sync(m.user, [{
+			username: 'andrew',
+			password: '12345',
+			roles: ['customer']
+		}, {
+			username: 'root',
+			password: '12345',
+			roles: ['administrator']
+		}]);
 
-								    user.insert({
-							            username: 'root',
-						                password: '12345',
-					                    roles: ['administrator']
-				                    }, function (err, result) {
-			                            if (err) return console.log(err);
-		                            });
-								});
-							});
-                        });
-                    });
-                });
-            });
-        });
-    });
+		defineAPI(done);
+	});
 });
 
 after(function () {
