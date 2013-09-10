@@ -122,6 +122,27 @@ provided.  You cannot use `ownerField` and `ownerSelf` at the same time.
 * `ownerField` The name of the field in each mongo document that holds the owner id.
 * `ownerSelf` If true the object uses its own "_id" field as its ownerField.
 
+<h2>Schema Additives</h2>
+There are a few additional tags that Autocrud will read from JSON-Schemas.  These allow you to manipulate how Autocrud
+will present data to the user as well as how to validate data.  These tags will not interfere with the `json-schema`
+library's normal validation process.
+
+```javascript
+autocrud({
+	... // Default options
+	schema: {
+		type: 'object',
+		properties: {
+			username: {type: 'string', required: true},
+			password: {type: 'string', required: true, hidden: true}
+		}
+	}
+});
+```
+* `hidden` If a field is marked hidden it will have normal validation applied to it during POST and PUT calls, but will
+  not be returned to the user during GET calls.
+
+
 <h2>Events</h2>
 There are a handful of events that will be fired with http calls to the Autocrud object.
 
@@ -141,3 +162,7 @@ skip are provided.
 * `deleteId`
     *  `id` The id of the resource deleted.
     *  `modCount` The number of documents that were deleted.
+
+<h2>Breaking Changes</h2>
+* `>= 0.2.4` The POST function no longer returns a whole document when called.  Going forward it will only return a root
+  object that contains the ObjectID of the newly created document.
