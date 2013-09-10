@@ -19,4 +19,29 @@ describe('Schema Manipulation (Implementation)', function() {
             });
         });
     });
+
+    it('should generate seperate schemas for POST and PUT calls', function(done) {
+        rest.json(callPrefix + '/schema', {
+            username: 'testyuser'
+        }, null, 'POST')
+            .on('complete', function(data, res) {
+            assert(res.statusCode === 400);
+
+            rest.json(callPrefix + '/schema', {
+                username: 'testyuser',
+                password: 'pass'
+            }, null, 'POST')
+                .on('complete', function(data, res) {
+                assert(res.statusCode === 200);
+
+                rest.json(callPrefix + '/schema/' + data._id, {
+                    username: 'testieuser'
+                }, null, 'PUT')
+                    .on('complete', function(data, res) {
+                    assert(res.statusCode === 200);
+                    done();
+                });
+            });
+        });
+    });
 });

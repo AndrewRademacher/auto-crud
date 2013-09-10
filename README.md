@@ -122,7 +122,7 @@ provided.  You cannot use `ownerField` and `ownerSelf` at the same time.
 * `ownerField` The name of the field in each mongo document that holds the owner id.
 * `ownerSelf` If true the object uses its own "_id" field as its ownerField.
 
-<h2>Schema Additives</h2>
+<h3>Schema Additives</h3>
 There are a few additional tags that Autocrud will read from JSON-Schemas.  These allow you to manipulate how Autocrud
 will present data to the user as well as how to validate data.  These tags will not interfere with the `json-schema`
 library's normal validation process.
@@ -142,6 +142,26 @@ autocrud({
 * `hidden` If a field is marked hidden it will have normal validation applied to it during POST and PUT calls, but will
   not be returned to the user during GET calls.
 
+<h3>Schema Variants</h3>
+Autocrud will generate separate validation schemas for POST and PUT calls.  Each element in a schema may be suffixed
+with either "_post" or "_put".  When a suffix is provided, the value of the tag will only be used in the schema that
+matches the suffix.  For example, if you need a field to be required a POST but not at PUT use "required_post" instead
+of "required".  Additionally, the schemas are parsed separately, which means you can a field to be a different type in
+the POST than in the PUT (i.e. `fieldName: {type_post: 'string', type_put: 'integer'}`)
+
+```javascript
+autocrud({
+	... // Default options
+	schema: {
+		type: 'object',
+		properties: {
+			username: {type: 'string', required: true},
+			password: {type: 'string', required_post: true},
+			modifiedTime: {type: 'string', required_put: true}
+		}
+	}
+});
+```
 
 <h2>Events</h2>
 There are a handful of events that will be fired with http calls to the Autocrud object.

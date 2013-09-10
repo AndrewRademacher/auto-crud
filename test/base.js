@@ -265,7 +265,7 @@ function defineAPI(done) {
                 },
                 password: {
                     type: 'string',
-                    required: true,
+                    required_post: true,
                     hidden: true
                 }
             },
