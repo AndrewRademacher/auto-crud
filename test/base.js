@@ -11,9 +11,9 @@ var express = require('express'),
 
 var autocrud = require('../lib/autocrud');
 
-var app = express(),
-    server,
-    mongo = {};
+app = express();
+server = null;
+mongo = {};
 
 domain = 'localhost:3000';
 domainPrefix = 'http://' + domain;
