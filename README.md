@@ -114,7 +114,7 @@ autocrud({
 	}
 	ownerSelf: true
 });
-``)`
+```
 
 NOTE: To enable object ownership the `ownerIdFromReq` field and either the `ownerField` or `ownerSelf` fields must be
 provided.  You cannot use `ownerField` and `ownerSelf` at the same time.
