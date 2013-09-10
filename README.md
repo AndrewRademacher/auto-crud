@@ -145,9 +145,9 @@ autocrud({
 <h3>Schema Variants</h3>
 Autocrud will generate separate validation schemas for POST and PUT calls.  Each element in a schema may be suffixed
 with either "_post" or "_put".  When a suffix is provided, the value of the tag will only be used in the schema that
-matches the suffix.  For example, if you need a field to be required a POST but not at PUT use "required_post" instead
-of "required".  Additionally, the schemas are parsed separately, which means you can a field to be a different type in
-the POST than in the PUT (i.e. `fieldName: {type_post: 'string', type_put: 'integer'}`)
+matches the suffix.  For example, if you need a field to be required for POST calls but not for PUT calls,  use "required_post" 
+instead of "required".  Additionally, the schemas are parsed separately, this means that a field can be of a different
+type in POST calls than in PUT calls (i.e. `fieldName: {type_post: 'string', type_put: 'integer'}`).
 
 ```javascript
 autocrud({
