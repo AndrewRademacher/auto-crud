@@ -1,4 +1,6 @@
 <h1>auto-crud</h1>
+[![Build Status](https://travis-ci.org/AndrewRademacher/auto-crud.png?branch=travisCI)](https://travis-ci.org/AndrewRademacher/auto-crud)
+[![NPM version](https://badge.fury.io/js/auto-crud.png)](http://badge.fury.io/js/auto-crud)
 
 <h2>Introduction</h2>
 auto-crud is an abstraction layer for generating REST routes to perform basic CRUD operations.  It glues together

@@ -1,6 +1,6 @@
 {
     "name": "auto-crud",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "description": "A simple tool for automatically generating REST APIs with json schemas and mongodb.",
     "author": "Andrew Rademacher",
     "main": "lib/autocrud.js",
