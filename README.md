@@ -1,5 +1,5 @@
 <h1>auto-crud</h1>
-[![Build Status](https://travis-ci.org/AndrewRademacher/auto-crud.png?branch=travisCI)](https://travis-ci.org/AndrewRademacher/auto-crud)
+[![Build Status](https://travis-ci.org/AndrewRademacher/auto-crud.png?branch=master)](https://travis-ci.org/AndrewRademacher/auto-crud)
 [![NPM version](https://badge.fury.io/js/auto-crud.png)](http://badge.fury.io/js/auto-crud)
 
 <h2>Introduction</h2>
